@@ -1,1 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body { 
+            margin: 0; background: #000; overflow: hidden; height: 100vh; width: 100vw; 
+        }
+        /* This layer holds the falling stars */
+        .star-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; /* Stars sit behind the machine */
+            pointer-events: none;
+        }
+        /* This is your arcade machine image */
+        #arcade-machine {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('background.jpg') no-repeat center center;
+            background-size: contain; /* Ensures the whole machine fits */
+            z-index: 2; /* Machine sits in front of the stars */
+        }
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: fall 30s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-5vh); }
+            100% { transform: translateY(105vh); }
+        }
+    </style>
+</head>
+<body>
+    <div class="star-container" id="star-container"></div>
+    <div id="arcade-machine"></div>
 
+    <script>
+        const container = document.getElementById('star-container');
+        for(let i = 0; i < 20; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.animationDelay = (Math.random() * 30) + 's';
+            container.appendChild(star);
+        }
+    </script>
+</body>
+</html>

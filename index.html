@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Xylon Arcade System</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        #canvas-container { position: relative; width: 100vw; height: 100vh; }
+        canvas { display: block; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="arcadeCanvas"></canvas>
+    </div>
+
+<script>
+class XylonEngine {
+    constructor() {
+        this.canvas = document.getElementById('arcadeCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.img = new Image();
+        this.img.src = 'background.jpg';
+        this.stars = Array.from({length: 40}, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            s: Math.random() * 2 + 0.5
+        }));
+        
+        this.init();
+    }
+
+    init() {
+        window.addEventListener('resize', () => this.resize());
+        this.resize();
+        this.startHum();
+        this.loop();
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    startHum() {
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.frequency.setValueAtTime(60, this.audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.02, this.audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        osc.start();
+    }
+
+    loop() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Update & Draw Stars (The "Rain")
+        this.ctx.fillStyle = '#FFF';
+        this.stars.forEach(st => {
+            st.y += 0.2; // Slow descent
+            if (st.y > this.canvas.height) st.y = 0;
+            this.ctx.fillRect(st.x, st.y, st.s, st.s);
+        });
+
+        // Draw Arcade Cabinet
+        if (this.img.complete) {
+            this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        requestAnimationFrame(() => this.loop());
+    }
+}
+
+// Instantiate engine on load
+window.onload = () => new XylonEngine();
+</script>
+</body>
+</html>

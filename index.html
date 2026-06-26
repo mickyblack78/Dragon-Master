@@ -2,45 +2,72 @@
 <html lang="en">
 <head>
     <style>
-        body { 
-            margin: 0; background: #000; overflow: hidden; height: 100vh; width: 100vw; 
-        }
-        /* This layer holds the falling stars */
-        .star-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; /* Stars sit behind the machine */
-            pointer-events: none;
-        }
-        /* This is your arcade machine image */
-        #arcade-machine {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('background.jpg') no-repeat center center;
-            background-size: contain; /* Ensures the whole machine fits */
-            z-index: 2; /* Machine sits in front of the stars */
-        }
-        .star {
-            position: absolute; background: white; border-radius: 50%;
-            animation: fall 30s linear infinite;
-        }
-        @keyframes fall {
-            0% { transform: translateY(-5vh); }
-            100% { transform: translateY(105vh); }
-        }
+        body { margin: 0; background: #000; overflow: hidden; height: 100vh; }
+        #app-container { transition: transform 0.5s ease-in-out; width: 100vw; height: 100vh; }
+        #arcade-view { width: 100%; height: 100%; background: url('background.jpg') no-repeat center center; background-size: contain; }
+        
+        /* Monitor Interface */
+        #monitor-menu { position: absolute; top: 20%; left: 28%; width: 44%; height: 35%; background: rgba(0,0,0,0.95); color: #0f0; padding: 20px; display: none; border: 4px solid #333; font-family: monospace; }
+        .zoomed #arcade-view { transform: scale(2.4) translateY(12%); }
+        .zoomed #monitor-menu { display: block; }
+        
+        .menu-item { margin: 8px 0; padding: 5px; cursor: pointer; }
+        .menu-item.active { background: #0f0; color: #000; font-weight: bold; }
+        
+        /* Joystick Hitbox Area */
+        #joystick-area { position: absolute; bottom: 10%; left: 10%; width: 20%; height: 20%; opacity: 0.2; background: red; }
     </style>
 </head>
 <body>
-    <div class="star-container" id="star-container"></div>
-    <div id="arcade-machine"></div>
+    <div id="app-container">
+        <div id="arcade-view" onclick="zoomIn()"></div>
+        <div id="monitor-menu">
+            <h2 id="menu-title">MAIN MENU</h2>
+            <div id="menu-options"></div>
+        </div>
+    </div>
+    <div id="joystick-area"></div>
 
     <script>
-        const container = document.getElementById('star-container');
-        for(let i = 0; i < 20; i++) {
-            let star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.animationDelay = (Math.random() * 30) + 's';
-            container.appendChild(star);
+        const menuData = {
+            "MAIN": ["STUDIO", "SOUND BOX", "COASTER", "DRAGON GAME"],
+            "STUDIO": ["Import Sound", "Record Sound", "Save Sound"],
+            "SOUND BOX": ["Stretch", "Pitch Shift", "Reverse", "Upside Down", "Granular Chop"],
+            "COASTER": ["Choose Library", "Speed Control", "Repeat Logic", "Frequency Filter", "Conveyor Snap"],
+            "DRAGON GAME": ["Start Game", "High Scores", "Settings"]
+        };
+
+        let currentView = "MAIN";
+        let activeIndex = 0;
+
+        function renderMenu(view) {
+            currentView = view; activeIndex = 0;
+            const container = document.getElementById('menu-options');
+            container.innerHTML = "";
+            document.getElementById('menu-title').innerText = view;
+            menuData[view].forEach((opt, idx) => {
+                let div = document.createElement('div');
+                div.className = 'menu-item ' + (idx === 0 ? 'active' : '');
+                div.innerText = "> " + opt;
+                container.appendChild(div);
+            });
+        }
+
+        function zoomIn() { document.body.classList.add('zoomed'); renderMenu("MAIN"); }
+
+        // Joystick Navigation Logic
+        const joy = document.getElementById('joystick-area');
+        joy.addEventListener('touchstart', (e) => {
+            let touchY = e.touches[0].clientY;
+            if (touchY < window.innerHeight * 0.85) navigateMenu(-1); // Up
+            else navigateMenu(1); // Down
+        });
+
+        function navigateMenu(dir) {
+            let items = document.querySelectorAll('.menu-item');
+            items[activeIndex].classList.remove('active');
+            activeIndex = (activeIndex + dir + items.length) % items.length;
+            items[activeIndex].classList.add('active');
         }
     </script>
 </body>

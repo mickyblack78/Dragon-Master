@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+  .star-container {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    opacity: 0.7; animation: fall 30s linear infinite;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-10px); }
+    100% { transform: translateY(100vh); }
+  }
+</style>
+</head>
+<body>
+  <div class="star-container" id="star-container"></div>
+  <script>
+    const container = document.getElementById('star-container');
+    // Create 15 stars with random horizontal positions and start delays
+    for(let i = 0; i < 15; i++) {
+      let star = document.createElement('div');
+      star.className = 'star';
+      star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 30 + 's';
+      container.appendChild(star);
+    }
+  </script>
+</body>
+</html>
